@@ -4,6 +4,7 @@ const cors = require("cors");
 require('dotenv').config();
 const bodyParser = require("body-parser");
 const app = express();
+const otpRoutes =  require("./routes/authRoutes")
 
 // Middleware for parsing JSON
 app.use(express.json());
@@ -20,6 +21,7 @@ app.get("/api", (req, res) => {
   res.json({ message: "API running successfully" });
 });
 
+app.use("/api", otpRoutes);
 
 // Connect to MongoDB (replace with your own URI)
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
