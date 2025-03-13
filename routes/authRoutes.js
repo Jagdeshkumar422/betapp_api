@@ -1,8 +1,11 @@
 const express = require("express");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const Otp = require("../models/otp");
 const User = require("../models/user");
 
 const router = express.Router();
+const SECRET_KEY = "your_secret_key"; // Change this to a secure secret
 
 // Generate Random 6-Digit OTP
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
@@ -41,7 +44,9 @@ router.post("/verify-otp", async (req, res) => {
   res.json({ success: true, message: "OTP verified successfully" });
 });
 
-
+/**
+ * 3️⃣ Register User
+ */
 router.post("/register", async (req, res) => {
   const { name, mobileNumber, password } = req.body;
 
@@ -49,8 +54,11 @@ router.post("/register", async (req, res) => {
   const otpRecord = await Otp.findOne({ mobileNumber });
   if (!otpRecord) return res.status(400).json({ error: "OTP not verified" });
 
+  // Hash password before storing
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   // Store user in DB
-  const newUser = new User({ name, mobileNumber, password });
+  const newUser = new User({ name, mobileNumber, password: hashedPassword });
   await newUser.save();
 
   // Delete OTP after registration
@@ -59,6 +67,9 @@ router.post("/register", async (req, res) => {
   res.json({ success: true, message: "User registered successfully" });
 });
 
+/**
+ * 4️⃣ Login API
+ */
 router.post("/login", async (req, res) => {
   const { mobileNumber, password } = req.body;
 
@@ -75,6 +86,5 @@ router.post("/login", async (req, res) => {
 
   res.json({ success: true, message: "Login successful", token });
 });
-
 
 module.exports = router;
