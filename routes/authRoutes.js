@@ -7,9 +7,6 @@ const User = require("../models/user");
 const router = express.Router();
 const SECRET_KEY = "your_secret_key"; // Change this to a secure secret
 
-// Store blacklisted tokens (use Redis for better scalability)
-const BLACKLIST = new Set();
-
 // Generate Random 6-Digit OTP
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -89,39 +86,5 @@ router.post("/login", async (req, res) => {
 
   res.json({ success: true, message: "Login successful", token });
 });
-
-/**
- * 5️⃣ Logout API
- */
-router.post("/logout", (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) return res.status(400).json({ error: "No token provided" });
-
-  // Add token to blacklist
-  BLACKLIST.add(token);
-
-  res.json({ success: true, message: "Logged out successfully" });
-});
-
-/**
- * 6️⃣ Middleware to Protect Routes (Checks Blacklisted Tokens)
- */
-const authenticateUser = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-  if (BLACKLIST.has(token)) {
-    return res.status(401).json({ error: "Token is invalid. Please log in again." });
-  }
-
-  jwt.verify(token, SECRET_KEY, (err, decoded) => {
-    if (err) return res.status(401).json({ error: "Invalid token" });
-
-    req.user = decoded;
-    next();
-  });
-};
 
 module.exports = router;
