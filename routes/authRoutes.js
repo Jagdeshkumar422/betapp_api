@@ -58,4 +58,23 @@ router.post("/register", async (req, res) => {
 
   res.json({ success: true, message: "User registered successfully" });
 });
+
+router.post("/login", async (req, res) => {
+  const { mobileNumber, password } = req.body;
+
+  // Check if user exists
+  const user = await User.findOne({ mobileNumber });
+  if (!user) return res.status(400).json({ error: "User not found" });
+
+  // Verify password
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
+
+  // Generate JWT token
+  const token = jwt.sign({ id: user._id, mobileNumber: user.mobileNumber }, SECRET_KEY, { expiresIn: "7d" });
+
+  res.json({ success: true, message: "Login successful", token });
+});
+
+
 module.exports = router;
