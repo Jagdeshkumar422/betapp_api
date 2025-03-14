@@ -5,6 +5,7 @@ require('dotenv').config();
 const bodyParser = require("body-parser");
 const app = express();
 const otpRoutes =  require("./routes/authRoutes")
+const betRoute = require("./routes/betRoute")
 
 // Middleware for parsing JSON
 app.use(express.json());
@@ -22,6 +23,7 @@ app.get("/api", (req, res) => {
 });
 
 app.use("/api", otpRoutes);
+app.use("/api", betRoute);
 
 // Connect to MongoDB (replace with your own URI)
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
