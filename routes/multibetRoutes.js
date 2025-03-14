@@ -26,32 +26,40 @@ const parseBetData = (text) => {
 // **API to Store Bets**
 router.post("/multibets", async (req, res) => {
     try {
-      console.log("Received request body:", req.body); // ✅ Debugging Log
-  
-      const { userId, text } = req.body;
-  
-      if (!userId) {
-        return res.status(400).json({ message: "User ID is required" });
-      }
-  
-      if (!Array.isArray(text) || text.length === 0) {
-        console.error("No valid bets found in request.");
-        return res.status(400).json({ message: "No valid bets found." });
-      }
-  
-      // ✅ Log each extracted bet for debugging
-      text.forEach((bet, index) => {
-        console.log(`Bet ${index + 1}:`, bet);
-      });
-  
-      // Process bets here...
-      res.json({ message: "Bets received successfully", bets: text });
+        console.log("Received request body:", req.body); // Debugging Log
+
+        const { userId, text } = req.body;
+
+        if (!userId) {
+            return res.status(400).json({ message: "User ID is required" });
+        }
+
+        if (!Array.isArray(text) || text.length === 0) {
+            console.error("No valid bets found in request.");
+            return res.status(400).json({ message: "No valid bets found." });
+        }
+
+        // Save bets to MongoDB
+        const savedBets = await Bet.insertMany(
+            text.map(bet => ({
+                userId,
+                gameId: bet.gameId,
+                date: bet.date,
+                teams: bet.teams,
+                ftScore: bet.ftScore,
+                pick: bet.pick,
+                market: bet.market,
+                outcome: bet.outcome
+            }))
+        );
+
+        console.log("Bets successfully stored:", savedBets);
+        res.json({ message: "Bets stored successfully", bets: savedBets });
     } catch (error) {
-      console.error("Error processing bets:", error);
-      res.status(500).json({ message: "Internal server error", error: error.message });
+        console.error("Error processing bets:", error);
+        res.status(500).json({ message: "Internal server error", error: error.message });
     }
-  });
-  
+});
   
 
 // **API to Fetch Stored Bets**
