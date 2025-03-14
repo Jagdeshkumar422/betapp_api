@@ -42,7 +42,7 @@ router.post("/multibets", async (req, res) => {
         console.log("Raw text before processing:", text);
 
         // ✅ Extract structured bets from raw text
-        const extractedBets = extractBetData(text);
+        const extractedBets = extractBets(text);
 
         console.log("Extracted Bets:", extractedBets);
 
