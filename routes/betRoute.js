@@ -1,48 +1,28 @@
 const express = require("express");
-const authMiddleware = require("../middleware/authMiddleware");
-const Bet = require("../models/bet")
-
 const router = express.Router();
+const Bet = require("../models/bet");
 
-router.get("/bets", async (req, res) => {
-    try {
-      const bets = await Bet.find();
-      res.json(bets);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-  
-  // Add a New Bet
-  router.post("/bets", async (req, res) => {
-    try {
-      const newBet = new Bet(req.body);
-      await newBet.save();
-      res.status(201).json(newBet);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-  
-  // Update Bet Status
-  router.put("/bets/:id", async (req, res) => {
-    try {
-      const { status } = req.body;
-      const updatedBet = await Bet.findByIdAndUpdate(req.params.id, { status }, { new: true });
-      res.json(updatedBet);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-  
-  // Delete Bet
-  router.delete("/bets/:id", async (req, res) => {
-    try {
-      await Bet.findByIdAndDelete(req.params.id);
-      res.json({ message: "Bet deleted successfully" });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+// Fetch Bets for Logged-in User
+router.get("/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const bets = await Bet.find({ userId }); // Fetch bets for specific user
+    res.json(bets);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching bets" });
+  }
+});
 
-  module.exports = router;
+// Add a Bet
+router.post("/", async (req, res) => {
+  try {
+    const { userId, stake, returnAmount, match, status, date } = req.body;
+    const newBet = new Bet({ userId, stake, returnAmount, match, status, date });
+    await newBet.save();
+    res.json(newBet);
+  } catch (error) {
+    res.status(500).json({ error: "Error adding bet" });
+  }
+});
+
+module.exports = router;
