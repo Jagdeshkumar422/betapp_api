@@ -11,6 +11,7 @@ const multibet = require('./routes/multibetRoutes')
 // Middleware for parsing JSON
 app.use(express.json());
 app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors({
     origin: "*", // Replace with your frontend URL
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
