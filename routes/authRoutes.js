@@ -3,6 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const Otp = require("../models/otp");
 const User = require("../models/user");
+const authMiddleware = require("../middleware/authMiddleware");
 
 const router = express.Router();
 const SECRET_KEY = "your_secret_key"; // Change this to a secure secret
@@ -85,6 +86,24 @@ router.post("/login", async (req, res) => {
   const token = jwt.sign({ id: user._id, mobileNumber: user.mobileNumber }, SECRET_KEY, { expiresIn: "7d" });
 
   res.json({ success: true, message: "Login successful", token });
+});
+
+router.get("/user/profile", authMiddleware, async (req, res) => {
+  try {
+    // Get user ID from request after authentication
+    const userId = req.user.id;
+
+    // Fetch user data from the database (excluding password)
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 module.exports = router;
