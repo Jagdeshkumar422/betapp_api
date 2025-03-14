@@ -3,7 +3,7 @@ const router = express.Router();
 const Bet = require("../models/bet");
 
 // Fetch Bets for Logged-in User
-router.get("/:userId", async (req, res) => {
+router.get("/bets/:userId", async (req, res) => {
   try {
     const { userId } = req.params;
     const bets = await Bet.find({ userId }); // Fetch bets for specific user
@@ -14,7 +14,7 @@ router.get("/:userId", async (req, res) => {
 });
 
 // Add a Bet
-router.post("/", async (req, res) => {
+router.post("/bets", async (req, res) => {
   try {
     const { userId, stake, returnAmount, match, status, date } = req.body;
     const newBet = new Bet({ userId, stake, returnAmount, match, status, date });
