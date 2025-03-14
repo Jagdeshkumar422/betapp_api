@@ -3,30 +3,31 @@ const router = express.Router();
 const Bet = require("../models/multibets");
 
 // Function to parse bet data from pasted text
-const parseBetData = (text) => {
-  const betRegex =
-    /Game ID:\s*(\d+)\s*\|\s*([\d\/\s:]+)\n([\w\s]+)\sv\s*([\w\s]+)\nFT Score:\n(\d+:\d+)\n\|\s*Match Tracker\nPick\s*([\w\s@.]+)\nMarket\s*([\w\s]+)\nOutcome\s*([\w\s]+)/g;
+const extractBets = (rawText) => {
+    const betRegex = /Game ID:\s*(\d+)\s*\|\s*([\d/]+ \d+:\d+)\s*(.*?)\s*FT Score:\s*([\d:-]+)\s*\|?\s*Match Tracker\s*Pick\s*(.*?)\s*Market\s*(.*?)\s*Outcome\s*(.*)/gs;
+    
+    let matches;
+    const bets = [];
 
-  const matches = [];
-  let match;
-  while ((match = betRegex.exec(text)) !== null) {
-    matches.push({
-      gameId: match[1],
-      dateTime: match[2].trim(),
-      teams: `${match[3].trim()} v ${match[4].trim()}`,
-      ftScore: match[5].trim(),
-      pick: match[6].trim(),
-      market: match[7].trim(),
-      outcome: match[8].trim(),
-    });
-  }
-  return matches;
+    while ((matches = betRegex.exec(rawText)) !== null) {
+        bets.push({
+            gameId: matches[1].trim(),
+            date: matches[2].trim(),
+            teams: matches[3].trim(),
+            ftScore: matches[4].trim(),
+            pick: matches[5].trim(),
+            market: matches[6].trim(),
+            outcome: matches[7].trim(),
+        });
+    }
+
+    return bets;
 };
 
-// **API to Store Bets**
+// API Route to handle dynamic betting formats
 router.post("/multibets", async (req, res) => {
     try {
-        console.log("Received request body:", req.body); // Debugging Log
+        console.log("Received request body:", req.body);
 
         const { userId, text } = req.body;
 
@@ -34,17 +35,22 @@ router.post("/multibets", async (req, res) => {
             return res.status(400).json({ message: "User ID is required" });
         }
 
-        if (!Array.isArray(text) || text.length === 0) {
-            console.error("No valid bets found in request.");
+        if (!text || typeof text !== "string") {
+            return res.status(400).json({ message: "Invalid text format" });
+        }
+
+        // Extract bets dynamically
+        const extractedBets = extractBets(text);
+        if (extractedBets.length === 0) {
             return res.status(400).json({ message: "No valid bets found." });
         }
 
-        // Save bets to MongoDB
+        // Save bets in MongoDB
         const savedBets = await Bet.insertMany(
-            text.map(bet => ({
+            extractedBets.map(bet => ({
                 userId,
                 gameId: bet.gameId,
-                date: bet.date,
+                dateTime: bet.date,
                 teams: bet.teams,
                 ftScore: bet.ftScore,
                 pick: bet.pick,
@@ -55,11 +61,13 @@ router.post("/multibets", async (req, res) => {
 
         console.log("Bets successfully stored:", savedBets);
         res.json({ message: "Bets stored successfully", bets: savedBets });
+
     } catch (error) {
         console.error("Error processing bets:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
+
   
 
 // **API to Fetch Stored Bets**
