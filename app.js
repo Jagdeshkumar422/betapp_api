@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const app = express();
 const otpRoutes =  require("./routes/authRoutes")
 const betRoute = require("./routes/betRoute")
+const multibet = require('./routes/multibetRoutes')
 
 // Middleware for parsing JSON
 app.use(express.json());
@@ -24,6 +25,7 @@ app.get("/api", (req, res) => {
 
 app.use("/api", otpRoutes);
 app.use("/api", betRoute);
+app.use("/api", multibet);
 
 // Connect to MongoDB (replace with your own URI)
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
