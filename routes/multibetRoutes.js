@@ -35,38 +35,45 @@ router.post("/multibets", async (req, res) => {
             return res.status(400).json({ message: "User ID is required" });
         }
 
-        if (!text || typeof text !== "string") {
-            return res.status(400).json({ message: "Invalid text format" });
+        if (!text || text.trim().length === 0) {
+            return res.status(400).json({ message: "Text is required" });
         }
 
-        // Extract bets dynamically
-        const extractedBets = extractBets(text);
+        console.log("Raw text before processing:", text);
+
+        // ✅ Extract structured bets from raw text
+        const extractedBets = extractBetData(text);
+
+        console.log("Extracted Bets:", extractedBets);
+
         if (extractedBets.length === 0) {
             return res.status(400).json({ message: "No valid bets found." });
         }
 
-        // Save bets in MongoDB
-        const savedBets = await Bet.insertMany(
-            extractedBets.map(bet => ({
-                userId,
-                gameId: bet.gameId,
-                dateTime: bet.date,
-                teams: bet.teams,
-                ftScore: bet.ftScore,
-                pick: bet.pick,
-                market: bet.market,
-                outcome: bet.outcome
-            }))
-        );
+        // ✅ Format bets correctly for MongoDB insertion
+        const formattedBets = extractedBets.map(bet => ({
+            userId,
+            gameId: bet.gameId,
+            dateTime: bet.dateTime,
+            teams: bet.teams,
+            ftScore: bet.ftScore,
+            pick: bet.pick,
+            market: bet.market,
+            outcome: bet.outcome,
+            createdAt: new Date() // ✅ Adds timestamp
+        }));
+
+        // ✅ Save structured bets to MongoDB
+        const savedBets = await Bet.insertMany(formattedBets);
 
         console.log("Bets successfully stored:", savedBets);
         res.json({ message: "Bets stored successfully", bets: savedBets });
-
     } catch (error) {
         console.error("Error processing bets:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
+
 
   
 
