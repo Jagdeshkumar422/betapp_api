@@ -25,32 +25,38 @@ const parseBetData = (text) => {
 
 // **API to Store Bets**
 router.post("/multibets", async (req, res) => {
-  try {
-    const { userId, text } = req.body; // Extract userId and pasted text
-
-    if (!userId || !text) {
-      return res.status(400).json({ message: "userId and text are required." });
+    try {
+      const { userId, text } = req.body; // Extract userId and pasted text
+  
+      if (!userId || !text || !Array.isArray(text)) {
+        return res.status(400).json({ message: "userId and text (array) are required." });
+      }
+  
+      console.log("Received bets:", text); // Debug log
+  
+      const bets = parseBetData(text); // Ensure parseBetData correctly extracts data
+  
+      if (!bets || bets.length === 0) {
+        console.log("No valid bets found:", bets); // Debug log
+        return res.status(400).json({ message: "No valid bets found." });
+      }
+  
+      // Add userId to each bet before storing in MongoDB
+      const betsToSave = bets.map((bet) => ({
+        ...bet,
+        userId, // Assign userId
+      }));
+  
+      console.log("Saving bets:", betsToSave); // Debug log
+  
+      await Bet.insertMany(betsToSave);
+      res.json({ message: "Bets saved successfully", bets: betsToSave });
+    } catch (error) {
+      console.error("Error saving bets:", error);
+      res.status(500).json({ message: "Server error" });
     }
-
-    const bets = parseBetData(text);
-
-    if (bets.length === 0) {
-      return res.status(400).json({ message: "No valid bets found." });
-    }
-
-    // Add userId to each bet before storing in MongoDB
-    const betsToSave = bets.map((bet) => ({
-      ...bet,
-      userId, // Assign userId
-    }));
-
-    await Bet.insertMany(betsToSave);
-    res.json({ message: "Bets saved successfully", bets: betsToSave });
-  } catch (error) {
-    console.error("Error saving bets:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
+  });
+  
 
 // **API to Fetch Stored Bets**
 router.get("/multibets/:userId", async (req, res) => {
