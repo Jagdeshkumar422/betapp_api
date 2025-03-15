@@ -32,6 +32,7 @@ app.use("/api", betRoute);
 app.use("/api", multibet);
 app.use("/api", depositRoute);
 app.use("/api", verifycodeRoute);
+app.use("/api", oddRoute);
 
 // Connect to MongoDB (replace with your own URI)
 mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
