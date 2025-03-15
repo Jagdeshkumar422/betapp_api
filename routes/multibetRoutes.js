@@ -70,12 +70,12 @@ router.get("/multibets/:userId", async (req, res) => {
   router.put("/multibets/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { market, pick, ftScore, outcome } = req.body;
+        const { market, pick, ftScore, outcome,status } = req.body;
 
         // Update the bet entry
         const updatedBet = await Bet.findByIdAndUpdate(
             id,
-            { market, pick, ftScore, outcome },
+            { market, pick, ftScore, outcome, status },
             { new: true } // Returns the updated document
         );
 
