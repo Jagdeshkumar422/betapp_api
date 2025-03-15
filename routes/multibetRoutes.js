@@ -66,5 +66,27 @@ router.get("/multibets/:userId", async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  router.put("/multibets/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { market, pick, ftScore, outcome } = req.body;
+
+        // Update the bet entry
+        const updatedBet = await Bet.findByIdAndUpdate(
+            id,
+            { market, pick, ftScore, outcome },
+            { new: true } // Returns the updated document
+        );
+
+        if (!updatedBet) {
+            return res.status(404).json({ message: "Bet not found" });
+        }
+
+        res.status(200).json(updatedBet);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating bet", error });
+    }
+});
   
 module.exports = router;
