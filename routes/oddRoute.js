@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const oddModel = require("../models/oddModel")
+const oddModel = require("../models/oddModel");
+
+// GET Odd by betId
 router.get("/odd/:betId", async (req, res) => {
     try {
         const { betId } = req.params;
@@ -9,37 +11,42 @@ router.get("/odd/:betId", async (req, res) => {
         if (oddData) {
             res.json(oddData);
         } else {
-            res.json({ odd: "No Code Found" });
+            res.status(404).json({ error: "No odd value found for this betId" });
         }
     } catch (error) {
         res.status(500).json({ error: "Server error" });
     }
 });
 
-// ✅ Check if verifyCode exists: Update or Insert
+// ✅ Corrected PUT Request - Update Odd Value by betId
 router.put("/odd/:betId", async (req, res) => {
     try {
         const { betId } = req.params;
         const { odd } = req.body;
 
-        // Check if the verifyCode already exists
+        if (!odd) {
+            return res.status(400).json({ error: "Odd value is required" });
+        }
+
+        // Check if betId exists in the database
         const existingOdd = await oddModel.findOne({ betId });
 
         if (existingOdd) {
-            // Update existing verifyCode entry
-            existingOdd.betId = betId;  // Update betId if needed
-            await existingVerify.save();
-            return res.json({ message: "Verify Code updated successfully", existingOdd });
+            // Update existing odd value
+            existingOdd.odd = odd;
+            await existingOdd.save();
+            return res.json({ message: "Odd value updated successfully", updatedOdd: existingOdd });
         }
 
-        // If verifyCode does not exist, create a new one
+        // If betId does not exist, create a new one
         const newOdd = new oddModel({ betId, odd });
         await newOdd.save();
-        res.json({ message: "New Verify Code added", newOdd });
+        res.json({ message: "New odd value added", newOdd });
 
     } catch (error) {
-        res.status(500).json({ error: "Error updating code" });
+        console.error("Error updating odd:", error);
+        res.status(500).json({ error: "Error updating odd value" });
     }
 });
 
-module.exports = router
+module.exports = router;
