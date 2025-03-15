@@ -9,6 +9,7 @@ const betRoute = require("./routes/betRoute")
 const multibet = require('./routes/multibetRoutes')
 const depositRoute = require("./routes/depositeRoute.js")
 const verifycodeRoute = require('./routes/verifyCodeRoute.js')
+const oddRoute = require("./routes/oddRoute.js")
 
 // Middleware for parsing JSON
 app.use(express.json());
