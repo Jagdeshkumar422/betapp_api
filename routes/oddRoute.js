@@ -23,7 +23,7 @@ router.put("/odd/:betId", async (req, res) => {
         const { odd } = req.body;
 
         // Check if the verifyCode already exists
-        const existingOdd = await oddModel.findOne({ odd });
+        const existingOdd = await oddModel.findOne({ betId });
 
         if (existingOdd) {
             // Update existing verifyCode entry
