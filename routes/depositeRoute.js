@@ -4,22 +4,28 @@ const Deposit = require("../models/deposite");
 
 // @route  POST /api/deposits
 // @desc   Make a deposit
-router.post("/deposite", async (req, res) => {
-  const { userId, amount } = req.body;
-
-  if (!userId || !amount || amount <= 0) {
-    return res.status(400).json({ message: "Invalid deposit data" });
-  }
-
-  try {
-    const deposit = new Deposit({ userId, amount });
-    await deposit.save();
-    res.status(201).json({ message: "Deposit successful", deposit });
-  } catch (error) {
-    res.status(500).json({ message: "Server error", error });
-  }
-});
-
+router.post("/deposit", async (req, res) => {
+    const { userId, amount } = req.body;
+  
+    if (!userId || !amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid deposit data" });
+    }
+  
+    try {
+      // Update the deposit if it exists, otherwise create a new one
+      const deposit = await Deposit.findOneAndUpdate(
+        { userId }, 
+        { $inc: { amount: amount } },  // Increment the amount
+        { new: true, upsert: true }  // Return updated document, create if not exists
+      );
+  
+      res.status(200).json({ message: "Deposit processed successfully", deposit });
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error });
+    }
+  });
+  
+  
 // @route  GET /api/deposits/:userId
 // @desc   Get all deposits for a user
 router.get("/deposite/:userId", async (req, res) => {
