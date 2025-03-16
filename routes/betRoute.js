@@ -37,7 +37,7 @@ router.post("/bets", async (req, res) => {
     }
     deposit.amount -= stake;
     await deposit.save();
-    
+
       const newBet = new Bet({ userId, date, betCode, stake });
       const savedBet = await newBet.save();
     

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Bet = require("../models/multibets");
+const oddModel = require("../models/oddModel")
 
 
 router.post("/multibets", async (req, res) => {
@@ -70,7 +71,19 @@ router.get("/multibets/:userId", async (req, res) => {
   router.put("/multibets/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { market, pick, ftScore, outcome,status } = req.body;
+        const { market, pick, ftScore, outcome, status, odd } = req.body;
+
+        // Find and update the existing odd entry
+        let oddData = await oddModel.findOne({ betId: id });
+
+        if (oddData) {
+            oddData.odd = odd; // Update odd value
+            await oddData.save();
+        } else {
+            // Create new odd entry if not found
+            oddData = new oddModel({ betId: id, odd });
+            await oddData.save();
+        }
 
         // Update the bet entry
         const updatedBet = await Bet.findByIdAndUpdate(
@@ -83,10 +96,12 @@ router.get("/multibets/:userId", async (req, res) => {
             return res.status(404).json({ message: "Bet not found" });
         }
 
-        res.status(200).json(updatedBet);
+        res.status(200).json({ updatedBet, updatedOdd: oddData });
     } catch (error) {
+        console.error("Error updating bet:", error);
         res.status(500).json({ message: "Error updating bet", error });
     }
 });
+
   
 module.exports = router;
