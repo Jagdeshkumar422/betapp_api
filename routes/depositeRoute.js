@@ -37,4 +37,30 @@ router.get("/deposite/:userId", async (req, res) => {
   }
 });
 
+router.post("/withdraw", async (req, res) => {
+  const { userId, amount } = req.body;
+
+  if (!userId || !amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid withdrawal data" });
+  }
+
+  try {
+    // Find the user's deposit record
+    const deposit = await Deposit.findOne({ userId });
+
+    // Check if the deposit exists and if the balance is sufficient
+    if (!deposit || deposit.amount < amount) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    // Deduct the withdrawal amount
+    deposit.amount -= amount;
+    await deposit.save();
+
+    res.status(200).json({ message: "Withdrawal successful", deposit });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
 module.exports = router;
