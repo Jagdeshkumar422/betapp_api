@@ -9,6 +9,7 @@ router.post("/multibets", async (req, res) => {
         console.log("Received request body:", req.body); // ✅ Debugging Log
 
         const { userId, text } = req.body;
+        const odd = 0.1
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
