@@ -11,10 +11,12 @@ router.get("/odd/:betId", async (req, res) => {
         if (oddData) {
             res.json(oddData);
         } else {
-            res.status(404).json({ error: "No odd value found for this betId" });
+            console.log("not found bet")
+            // res.status(404).json({ error: "No odd value found for this betId" });
         }
     } catch (error) {
-        res.status(500).json({ error: "Server error" });
+        console.log("server error")
+        // res.status(500).json({ error: "Server error" });
     }
 });
 
