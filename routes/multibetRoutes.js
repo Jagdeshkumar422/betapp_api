@@ -74,7 +74,7 @@ router.get("/multibets/:userId", async (req, res) => {
         const { market, pick, ftScore, outcome, status, odd, userId } = req.body;
 
         // Find and update the existing odd entry
-        let oddData = await oddModel.findOne({ betId: id });
+        let oddData = await oddModel.findOne({ betId: userId });
 
         if (oddData) {
             oddData.odd = odd; // Update odd value
