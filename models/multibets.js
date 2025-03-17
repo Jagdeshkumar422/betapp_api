@@ -13,7 +13,8 @@ const BetSchema = new mongoose.Schema({
     pick: String,
     market: String,
     outcome: String,
-    status: String
+    status: String,
+    userId1: {type: String, required: true}
   });
 
   module.exports = mongoose.model("multbet", BetSchema)

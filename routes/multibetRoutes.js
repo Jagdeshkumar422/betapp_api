@@ -8,7 +8,7 @@ router.post("/multibets", async (req, res) => {
     try {
         console.log("Received request body:", req.body); // ✅ Debugging Log
 
-        const { userId, text } = req.body;
+        const { userId, text, userId1 } = req.body;
         const odd = 0.1
 
         if (!userId) {
