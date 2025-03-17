@@ -46,7 +46,8 @@ router.post("/multibets", async (req, res) => {
                 pick: bet.pick,
                 market: bet.market,
                 outcome: bet.outcome,
-                createdAt: new Date() // Automatically store timestamp
+                createdAt: new Date(), // Automatically store timestamp
+                userId1
             }))
         );
 
