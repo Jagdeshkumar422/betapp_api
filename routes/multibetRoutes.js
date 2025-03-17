@@ -80,6 +80,22 @@ router.get("/multibets/:userId", async (req, res) => {
     }
   });
 
+  router.get("/multibet/:userId1", async (req, res) => {
+    try {
+      const { userId1 } = req.params; // Get userId from request params
+      const bets = await Bet.find({ userId1: userId1 }); // Find bets for the specific user
+  
+      if (!bets.length) {
+        return res.status(404).json({ message: "No bets found for this user." });
+      }
+  
+      res.json(bets);
+    } catch (error) {
+      console.error("Error fetching bets:", error); 
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
   router.put("/multibets/:id", async (req, res) => {
     try {
         const { id } = req.params;
