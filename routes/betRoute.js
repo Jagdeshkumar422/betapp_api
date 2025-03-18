@@ -17,7 +17,7 @@ router.get("/bets/:userId", async (req, res) => {
 // Add a Bet
 router.post("/bets", async (req, res) => {
     try {
-      const { userId, date, betCode, stake } = req.body;
+      const { userId, date, betCode, stake, odd } = req.body;
   
       // Validate required fields
       if (!userId || !date || !betCode || !stake) {
@@ -38,7 +38,7 @@ router.post("/bets", async (req, res) => {
     deposit.amount -= stake;
     await deposit.save();
 
-      const newBet = new Bet({ userId, date, betCode, stake });
+      const newBet = new Bet({ userId, date, betCode, stake, odd });
       const savedBet = await newBet.save();
     
       res.status(201).json(savedBet);

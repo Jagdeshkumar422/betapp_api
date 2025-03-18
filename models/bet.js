@@ -13,6 +13,7 @@ const betSchema = new mongoose.Schema({
     type: String, // Format: "DD-MM"
     required: true,
   },
+  odd: String
 });
 
 const Bet = mongoose.model("Bet", betSchema);
