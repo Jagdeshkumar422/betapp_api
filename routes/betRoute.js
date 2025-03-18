@@ -47,5 +47,35 @@ router.post("/bets", async (req, res) => {
       res.status(500).json({ error: "Internal server error", details: error.message });
     }
   });
+
+  // Update Odd for a Bet
+router.put("/bets/:betId", async (req, res) => {
+  try {
+    const { betId } = req.params;
+    const { odd } = req.body;
+
+    // Validate the odd value
+    if (!odd || isNaN(odd) || odd <= 0) {
+      return res.status(400).json({ error: "Invalid odd value" });
+    }
+
+    // Find and update the bet
+    const updatedBet = await Bet.findByIdAndUpdate(
+      betId,
+      { $set: { odd } },
+      { new: true }
+    );
+
+    if (!updatedBet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    res.json(updatedBet);
+  } catch (error) {
+    console.error("Error updating bet odd:", error.message);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
   
 module.exports = router;
