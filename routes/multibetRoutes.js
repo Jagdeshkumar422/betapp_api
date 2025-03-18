@@ -14,16 +14,7 @@ router.post("/multibets", async (req, res) => {
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
         }
-        let oddData = await oddModel.findOne({ betId: userId });
 
-        if (oddData) {
-            oddData.odd = odd; // Update odd value
-            await oddData.save();
-        } else {
-            // Create new odd entry if not found
-            oddData = new oddModel({ betId: userId, odd });
-            await oddData.save();
-        }
 
         if (!Array.isArray(text) || text.length === 0) {
             console.error("No valid bets found in request.");
