@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Bet = require("../models/multibets");
-const oddModel = require("../models/bet")
+const oddModel = require("../models/oddModel")
 
 
 router.post("/multibets", async (req, res) => {
@@ -101,45 +101,22 @@ router.get("/multibets/:userId", async (req, res) => {
         const { id } = req.params;
         const { market, pick, ftScore, outcome, status, odd, userId } = req.body;
 
-        if (!id || !userId) {
-            return res.status(400).json({ message: "Bet ID and User ID are required." });
+        // Find and update the existing odd entry
+        let oddData = await oddModel.findOne({ betId: userId });
+
+        if (oddData) {
+            oddData.odd = odd; // Update odd value
+            await oddData.save();
+        } else {
+            // Create new odd entry if not found
+            oddData = new oddModel({ betId: userId, odd });
+            await oddData.save();
         }
 
-        // Update only the odd in oddModel
-        const updatedOdd = await oddModel.findOneAndUpdate(
-            { userId }, 
-            { $set: { odd } }, // ✅ Update only the odd field
-            { new: true, upsert: true } // ✅ Create if it doesn't exist
-        );
-
-        // Keep everything the same in Bet except odd
+        // Update the bet entry
         const updatedBet = await Bet.findByIdAndUpdate(
             id,
-            { market, pick, ftScore, outcome, status }, // ✅ No changes to odd
-            { new: true, runValidators: true }
-        );
-
-        if (!updatedBet) {
-            return res.status(404).json({ message: "Bet not found." });
-        }
-
-        res.status(200).json({ updatedBet, updatedOdd });
-    } catch (error) {
-        console.error("Error updating bet:", error);
-        res.status(500).json({ message: "Error updating bet", error: error.message });
-    }
-});
-
-
-router.put("/multibets/update/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { teams, gameId, dateTime } = req.body;
-
-        // Find and update the bet entry
-        const updatedBet = await Bet.findByIdAndUpdate(
-            id,
-            { teams, gameId, dateTime },
+            { market, pick, ftScore, outcome, status },
             { new: true } // Returns the updated document
         );
 
@@ -147,7 +124,7 @@ router.put("/multibets/update/:id", async (req, res) => {
             return res.status(404).json({ message: "Bet not found" });
         }
 
-        res.status(200).json({ message: "Bet updated successfully", updatedBet });
+        res.status(200).json({ updatedBet, updatedOdd: oddData });
     } catch (error) {
         console.error("Error updating bet:", error);
         res.status(500).json({ message: "Error updating bet", error });
