@@ -14,6 +14,7 @@ const BetSchema = new mongoose.Schema({
     market: String,
     outcome: String,
     status: String,
+    userId1: String
   });
 
   module.exports = mongoose.model("multbet", BetSchema)

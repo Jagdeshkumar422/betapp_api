@@ -15,7 +15,6 @@ router.post("/multibets", async (req, res) => {
             return res.status(400).json({ message: "User ID is required" });
         }
 
-
         if (!Array.isArray(text) || text.length === 0) {
             console.error("No valid bets found in request.");
             return res.status(400).json({ message: "No valid bets found." });
