@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Bet = require("../models/multibets");
-const oddModel = require("../models/oddModel")
+const oddModel = require("../models/bet")
 
 
 router.post("/multibets", async (req, res) => {
@@ -105,8 +105,8 @@ router.get("/multibets/:userId", async (req, res) => {
             return res.status(400).json({ message: "Bet ID and User ID are required." });
         }
 
-        // Check if an odd entry exists
-        const oddData = await oddModel.findOne({ id: userId });
+        // Check if an odd entry exists using _id instead of userId
+        const oddData = await oddModel.findById(userId);
 
         if (!oddData) {
             return res.status(404).json({ message: "Odd entry not found for this user." });
@@ -133,6 +133,7 @@ router.get("/multibets/:userId", async (req, res) => {
         res.status(500).json({ message: "Error updating bet", error: error.message });
     }
 });
+
 
 
 router.put("/multibets/update/:id", async (req, res) => {
