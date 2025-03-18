@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Bet = require("../models/multibets");
-const oddModel = require("../models/oddModel")
+const oddModel = require("../models/bet")
 
 
 router.post("/multibets", async (req, res) => {
