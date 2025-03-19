@@ -25,6 +25,21 @@ router.put("/cashout/:betId", async (req, res) => {
       res.status(500).json({ success: false, message: "Server error", error });
     }
   });
+
+  router.get("/cashout/:betId", async (req, res) => {
+    const { betId } = req.params;
+
+    try {
+        const bet = await CashOutModel.findOne({ betId });
+        if (bet) {
+            return res.json({ success: true, bet });
+        } else {
+            return res.status(404).json({ success: false, message: "No record found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error });
+    }
+});
   
 
 module.exports =router
