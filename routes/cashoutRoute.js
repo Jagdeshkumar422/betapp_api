@@ -19,7 +19,7 @@ router.put("/cashout/:betId", async (req, res) => {
         // If bet does not exist, create a new entry
         bet = new CashOutModel({ betId, cashStatus, amount });
         await bet.save();
-        return res.json({ success: true, message: "New cashout record added", bet });
+        return res.json({ success: true, message: "record added", bet });
       }
     } catch (error) {
       res.status(500).json({ success: false, message: "Server error", error });
