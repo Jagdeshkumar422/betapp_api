@@ -63,4 +63,30 @@ router.post("/withdraw", async (req, res) => {
   }
 });
 
+router.put("/update-currency", async (req, res) => {
+  const { userId, currencyType } = req.body;
+
+  if (!userId || !currencyType || !["GHS", "NGN"].includes(currencyType)) {
+    return res.status(400).json({ message: "Invalid request data" });
+  }
+
+  try {
+    // Update only the currencyType field
+    const deposit = await Deposit.findOneAndUpdate(
+      { userId },
+      { currencyType },
+      { new: true }
+    );
+
+    if (!deposit) {
+      return res.status(404).json({ message: "Deposit record not found" });
+    }
+
+    res.status(200).json({ message: "Currency updated successfully", deposit });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
+});
+
+
 module.exports = router;
