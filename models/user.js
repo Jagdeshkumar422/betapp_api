@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
   subscription: { type: String, enum: ["free", "premium"], default: "free" },
   expiry: { type: Date },
   grandAuditLimit: { type: Number, default: 0 },
-  userIcon: {type: String}
-}, { timestamps: true, default: 'https://res.cloudinary.com/dir5lv73s/image/upload/v1742455852/userProfile/3_1_absxgl.png' });
+  userIcon: {type: String, default: 'https://res.cloudinary.com/dir5lv73s/image/upload/v1742455852/userProfile/3_1_absxgl.png'}
+}, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
