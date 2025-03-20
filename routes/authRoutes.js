@@ -45,19 +45,22 @@ router.post("/verify-otp", async (req, res) => {
   res.json({ success: true, message: "OTP verified successfully" });
 });
 
-/**
- * 3️⃣ Register User
- */
+
 router.post("/register", async (req, res) => {
-  const { name, mobileNumber, password, username, email, displayName, subscription, expiry, grandAuditLimit } = req.body;
+  const { name, mobileNumber, password, username, email } = req.body;
 
   try {
     // Check if OTP is verified
-    const otpRecord = await Otp.findOne({ mobileNumber });
-    if (!otpRecord) return res.status(400).json({ error: "OTP not verified" });
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Set default values
+    const subscription = "premium"; // Default to premium on registration
+    const expiry = new Date(); // Get current date
+    expiry.setDate(expiry.getDate() + 30); // Add 30 days for premium subscription
+
+    const grandAuditLimit = 2000000.00; // Default value for grand audit limit
 
     // Store user in DB
     const newUser = new User({
@@ -66,7 +69,6 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       username,
       email,
-      displayName,
       subscription,
       expiry,
       grandAuditLimit,
@@ -80,6 +82,7 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 
 /**
