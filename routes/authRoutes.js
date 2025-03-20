@@ -123,4 +123,31 @@ router.get("/user/profile", authMiddleware, async (req, res) => {
   }
 });
 
+router.put("/update-user-icon", async (req, res) => {
+  const { userId, imageUrl } = req.body;
+
+  if (!userId || !imageUrl) {
+    return res.status(400).json({ error: "User ID and image URL are required" });
+  }
+
+  try {
+    // Find the user and update the userIcon field
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { userIcon: imageUrl },
+      { new: true } // Return the updated user document
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ success: true, message: "User icon updated successfully", user: updatedUser });
+  } catch (error) {
+    console.error("Error updating user icon:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 module.exports = router;
