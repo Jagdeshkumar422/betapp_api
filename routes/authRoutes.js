@@ -49,24 +49,38 @@ router.post("/verify-otp", async (req, res) => {
  * 3️⃣ Register User
  */
 router.post("/register", async (req, res) => {
-  const { name, mobileNumber, password } = req.body;
+  const { name, mobileNumber, password, username, email, displayName, subscription, expiry, grandAuditLimit } = req.body;
 
-  // Check if OTP is verified
-  const otpRecord = await Otp.findOne({ mobileNumber });
-  if (!otpRecord) return res.status(400).json({ error: "OTP not verified" });
+  try {
+    // Check if OTP is verified
+    const otpRecord = await Otp.findOne({ mobileNumber });
+    if (!otpRecord) return res.status(400).json({ error: "OTP not verified" });
 
-  // Hash password before storing
-  const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password before storing
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-  // Store user in DB
-  const newUser = new User({ name, mobileNumber, password: hashedPassword });
-  await newUser.save();
+    // Store user in DB
+    const newUser = new User({
+      name,
+      mobileNumber,
+      password: hashedPassword,
+      username,
+      email,
+      displayName,
+      subscription,
+      expiry,
+      grandAuditLimit,
+    });
 
-  // Delete OTP after registration
-  await Otp.deleteOne({ mobileNumber });
+    await newUser.save();
 
-  res.json({ success: true, message: "User registered successfully" });
+    res.json({ success: true, message: "User registered successfully" });
+  } catch (error) {
+    console.error("Registration error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
+
 
 /**
  * 4️⃣ Login API
