@@ -149,15 +149,32 @@ router.put("/update-user-icon", async (req, res) => {
   }
 });
 
-router.put('/update-name', async (req, res) => {
-  const { userId, name } = req.body;
-  if (!userId || !name) return res.status(400).json({ message: "Invalid data" });
-
+router.put("/update-name", async (req, res) => {
   try {
-    await User.findByIdAndUpdate(userId, { name });
-    res.status(200).json({ message: "Name updated successfully" });
+    console.log("Received Request Body:", req.body); // Debugging
+
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ message: "Request body is empty" });
+    }
+
+    const { userId, newName } = req.body;
+
+    if (!userId || !newName.trim()) {
+      return res.status(400).json({ message: "User ID and new name are required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.name = newName;
+    await user.save();
+
+    res.status(200).json({ message: "Name updated successfully", updatedName: user.name });
   } catch (error) {
-    res.status(500).json({ message: "Error updating name", error });
+    console.error("Error updating name:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
