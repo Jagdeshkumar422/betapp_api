@@ -149,5 +149,17 @@ router.put("/update-user-icon", async (req, res) => {
   }
 });
 
+router.put('/update-name', async (req, res) => {
+  const { userId, name } = req.body;
+  if (!userId || !name) return res.status(400).json({ message: "Invalid data" });
+
+  try {
+    await User.findByIdAndUpdate(userId, { name });
+    res.status(200).json({ message: "Name updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating name", error });
+  }
+});
+
 
 module.exports = router;
