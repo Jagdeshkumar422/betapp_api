@@ -1,27 +1,29 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
-require('dotenv').config();
+require("dotenv").config();
 const bodyParser = require("body-parser");
 const app = express();
-const otpRoutes =  require("./routes/authRoutes")
-const betRoute = require("./routes/betRoute")
-const multibet = require('./routes/multibetRoutes')
-const depositRoute = require("./routes/depositeRoute.js")
-const verifycodeRoute = require('./routes/verifyCodeRoute.js')
-const oddRoute = require("./routes/oddRoute.js")
-const cashOut = require("./routes/cashoutRoute.js")
+const otpRoutes = require("./routes/authRoutes");
+const betRoute = require("./routes/betRoute");
+const multibet = require("./routes/multibetRoutes");
+const depositRoute = require("./routes/depositeRoute.js");
+const verifycodeRoute = require("./routes/verifyCodeRoute.js");
+const oddRoute = require("./routes/oddRoute.js");
+const cashOut = require("./routes/cashoutRoute.js");
 
 // Middleware for parsing JSON
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({
+app.use(
+  cors({
     origin: "*", // Replace with your frontend URL
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  }));
+  })
+);
 // Register the routes
 
 app.get("/api", (req, res) => {
@@ -37,13 +39,16 @@ app.use("/api", oddRoute);
 app.use("/api", cashOut);
 
 // Connect to MongoDB (replace with your own URI)
-mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose
+  .connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
-    console.log('Connected to MongoDB');
-   
+    console.log("Connected to MongoDB");
   })
   .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
+    console.error("Error connecting to MongoDB:", error);
   });
 
 const PORT = process.env.PORT || 5002;
