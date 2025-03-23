@@ -50,17 +50,27 @@ router.post("/register", async (req, res) => {
   const { name, mobileNumber, password, username, email } = req.body;
 
   try {
-    // Check if OTP is verified
+    // Check if user already exists with the same username, email, or mobileNumber
+    const existingUser = await User.findOne({
+      $or: [{ username }, { email }, { mobileNumber }],
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this username, email, or mobile number already exists",
+      });
+    }
 
     // Hash password before storing
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Set default values
     const subscription = "premium"; // Default to premium on registration
-    const expiry = new Date(); // Get current date
+    const expiry = new Date();
     expiry.setDate(expiry.getDate() + 30); // Add 30 days for premium subscription
 
-    const grandAuditLimit = 2000000.00; // Default value for grand audit limit
+    const grandAuditLimit = 2000000.0; // Default value for grand audit limit
 
     // Store user in DB
     const newUser = new User({
@@ -76,12 +86,13 @@ router.post("/register", async (req, res) => {
 
     await newUser.save();
 
-    res.json({ success: true, message: "User registered successfully" });
+    res.status(201).json({ success: true, message: "User registered successfully" });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
+
 
 
 
