@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Bet = require("../models/bet");
 const Deposit =  require("../models/deposite")
+const Match = require("../models/multibets")
 
 // Fetch Bets for Logged-in User
 router.get("/bets/:userId", async (req, res) => {
@@ -77,5 +78,34 @@ router.put("/bets/:betId", async (req, res) => {
   }
 });
 
+router.delete("/bets/:betId", async (req, res) => {
+  try {
+    const { betId } = req.params;
+
+    // Find the bet
+    const bet = await Bet.findById(betId);
+    if (!bet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    // Find the user's deposit and refund the stake
+    const deposit = await Deposit.findOne({ userId: bet.userId });
+    if (deposit) {
+      deposit.amount += bet.stake; // Refund the stake amount
+      await deposit.save();
+    }
+
+    // Delete related matches
+    await Match.deleteMany({ betId });
+
+    // Delete the bet
+    await Bet.findByIdAndDelete(betId);
+
+    res.json({ message: "Bet and related matches deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting bet:", error.message);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
   
 module.exports = router;
