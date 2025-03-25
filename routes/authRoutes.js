@@ -295,7 +295,7 @@ router.get("/admin/getAllUsersByStatus", async (req, res) => {
   }
 });
 
-router.put("/admin/updateUserAccountStatus/:id", async (req, res) => {
+router.put("/admin/disableUserAccountStatus/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const user = await User.findById(id);
@@ -311,6 +311,48 @@ router.put("/admin/updateUserAccountStatus/:id", async (req, res) => {
   } catch (error) {
     console.error("Error disabling user", error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.put("/admin/activeUserAccountStatus/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Find user with 'Hold' status
+    const user = await User.findOne({ _id: id, accountStatus: "Hold" });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found or not on Hold" });
+    }
+
+    // Update user status & expiry date
+    await User.findByIdAndUpdate(id, {
+      accountStatus: "Active",
+    });
+
+    res
+      .status(200)
+      .json({ success: true, message: "User activated successfully." });
+  } catch (error) {
+    console.error("Error activating user", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
+
+router.get("/admin/getExpiredUsers", async (req, res) => {
+  try {
+    const currentDate = new Date();
+
+    // Find users where expiry date is before today
+    const expiredUsers = await User.find({ expiry: { $lt: currentDate } });
+
+    res.status(200).json({
+      success: true,
+      expiredUsers,
+    });
+  } catch (error) {
+    console.error("Error fetching expired users:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -334,11 +376,11 @@ router.put("/admin/activeUserAccount/:id", async (req, res) => {
     }
 
     // Find user with 'Hold' status
-    const user = await User.findOne({ _id: id, accountStatus: "Hold" });
+    const user = await User.findById(id);
     if (!user) {
       return res
         .status(404)
-        .json({ success: false, message: "User not found or not on Hold" });
+        .json({ success: false, message: "User not found" });
     }
 
     // Calculate expiry date correctly
@@ -347,7 +389,6 @@ router.put("/admin/activeUserAccount/:id", async (req, res) => {
 
     // Update user status & expiry date
     await User.findByIdAndUpdate(id, {
-      accountStatus: "Active",
       expiry: expiry,
     });
 
