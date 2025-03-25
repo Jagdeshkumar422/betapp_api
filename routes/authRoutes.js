@@ -50,19 +50,56 @@ router.post("/verify-otp", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  const { name, mobileNumber, password, username, email } = req.body;
+  const {
+    name,
+    // mobileNumber,
+    password,
+    username,
+    email,
+    expiry,
+    subscription,
+  } = req.body;
+
+  // console.log(req.body);
 
   try {
+    if (
+      !name ||
+      name.trim() === "" ||
+      !password ||
+      password.trim() === "" ||
+      !username ||
+      username.trim() === "" ||
+      !email ||
+      email.trim() === "" ||
+      !req.body.expiry ||
+      req.body.expiry.trim() === ""
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required." });
+    }
+    if (req.body.expiry === "none") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Select expiry period" });
+    }
     // Check if user already exists with the same username, email, or mobileNumber
-    const existingUser = await User.findOne({
-      $or: [{ username }, { email }, { mobileNumber }],
-    });
+    const existingUserUsingEmail = await User.findOne({ email });
 
-    if (existingUser) {
+    if (existingUserUsingEmail) {
       return res.status(400).json({
         success: false,
-        message:
-          "User with this username, email, or mobile number already exists",
+        message: "User with this email already exists",
+      });
+    }
+
+    const existingUserUsingUsername = await User.findOne({ username });
+
+    if (existingUserUsingUsername) {
+      return res.status(400).json({
+        success: false,
+        message: "User with this username already exists",
       });
     }
 
@@ -70,7 +107,7 @@ router.post("/register", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Set default values
-    const subscription = "premium"; // Default to premium on registration
+    //const subscription = "premium"; // Default to premium on registration
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + 30); // Add 30 days for premium subscription
 
@@ -79,7 +116,7 @@ router.post("/register", async (req, res) => {
     // Store user in DB
     const newUser = new User({
       name,
-      mobileNumber,
+      // mobileNumber,
       password: hashedPassword,
       username,
       email,
@@ -89,7 +126,6 @@ router.post("/register", async (req, res) => {
     });
 
     await newUser.save();
-
     res
       .status(201)
       .json({ success: true, message: "User registered successfully" });
@@ -103,10 +139,10 @@ router.post("/register", async (req, res) => {
  * 4️⃣ Login API
  */
 router.post("/login", async (req, res) => {
-  const { mobileNumber, password } = req.body;
+  const { email, password } = req.body;
 
   // Check if user exists
-  const user = await User.findOne({ mobileNumber });
+  const user = await User.findOne({ email });
   if (!user) return res.status(400).json({ error: "User not found" });
 
   // Verify password
@@ -114,11 +150,9 @@ router.post("/login", async (req, res) => {
   if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
   // Generate JWT token
-  const token = jwt.sign(
-    { id: user._id, mobileNumber: user.mobileNumber },
-    SECRET_KEY,
-    { expiresIn: "7d" }
-  );
+  const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
+    expiresIn: "7d",
+  });
 
   res.json({ success: true, message: "Login successful", token });
 });
