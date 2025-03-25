@@ -56,7 +56,7 @@ router.post("/register", async (req, res) => {
     password,
     username,
     email,
-    expiry,
+    expiryDate,
     subscription,
   } = req.body;
 
@@ -72,14 +72,14 @@ router.post("/register", async (req, res) => {
       username.trim() === "" ||
       !email ||
       email.trim() === "" ||
-      !req.body.expiry ||
-      req.body.expiry.trim() === ""
+      !expiryDate ||
+      expiryDate.trim() === ""
     ) {
       return res
         .status(400)
         .json({ success: false, message: "All fields are required." });
     }
-    if (req.body.expiry === "none") {
+    if (expiryDate === "none") {
       return res
         .status(400)
         .json({ success: false, message: "Select expiry period" });
@@ -109,14 +109,13 @@ router.post("/register", async (req, res) => {
     // Set default values
     //const subscription = "premium"; // Default to premium on registration
     const expiry = new Date();
-    expiry.setDate(expiry.getDate() + 30); // Add 30 days for premium subscription
+    expiry.setDate(expiry.getDate() + expiryDate); // Add 30 days for premium subscription
 
     const grandAuditLimit = 2000000.0; // Default value for grand audit limit
 
     // Store user in DB
     const newUser = new User({
       name,
-      // mobileNumber,
       password: hashedPassword,
       username,
       email,
@@ -269,6 +268,24 @@ router.get("/admin/getAllUsers", async (req, res) => {
   } catch (error) {
     console.error("Error fetching all users", error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.delete("/admin/deleteUser/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+    await User.findOneAndDelete(id);
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully." });
+  } catch (error) {
+    console.log(error);
   }
 });
 
