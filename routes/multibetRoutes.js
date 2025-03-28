@@ -9,7 +9,6 @@ router.post("/multibets", async (req, res) => {
         console.log("Received request body:", req.body); // ✅ Debugging Log
 
         const { userId, text, userId1 } = req.body;
-        const odd = 0.1
 
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
@@ -25,8 +24,16 @@ router.post("/multibets", async (req, res) => {
             console.log(`Bet ${index + 1}:`, bet);
         });
 
-        let totalOdd = text.reduce((sum, bet) => sum + parseFloat(bet.odd || 0), 0);
-        await oddModel.updateOne({_id: userId }, { $set: { odd: totalOdd } });
+        // ✅ Multiply all odds together
+        let totalOdd = text.reduce((product, bet) => {
+            let oddValue = parseFloat(bet.odd || 1); // Default to 1 if odd is missing
+            return product * oddValue;
+        }, 1);
+
+        console.log("✅ Total Odd (Multiplication):", totalOdd);
+
+        // ✅ Update the oddModel with the correct multiplied odd
+        await oddModel.updateOne({ _id: userId }, { $set: { odd: totalOdd } });
 
         // ✅ Save bets to MongoDB
         const savedBets = await Bet.insertMany(
@@ -44,14 +51,15 @@ router.post("/multibets", async (req, res) => {
             }))
         );
 
-        console.log("Bets successfully stored:", savedBets);
-        res.json({ message: "Bets stored successfully", bets: savedBets });
+        console.log("✅ Bets successfully stored:", savedBets);
+        res.json({ message: "Bets stored successfully", bets: savedBets, totalOdd });
 
     } catch (error) {
-        console.error("Error processing bets:", error);
+        console.error("❌ Error processing bets:", error);
         res.status(500).json({ message: "Internal server error", error: error.message });
     }
 });
+
 
   
   
