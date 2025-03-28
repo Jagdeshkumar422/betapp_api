@@ -26,7 +26,7 @@ router.post("/multibets", async (req, res) => {
         });
 
         let totalOdd = text.reduce((sum, bet) => sum + parseFloat(bet.odd || 0), 0);
-        await oddModel.updateMany({ userId }, { $set: { odd: totalOdd } });
+        await oddModel.updateOne({_id: userId }, { $set: { odd: totalOdd } });
 
         // ✅ Save bets to MongoDB
         const savedBets = await Bet.insertMany(
