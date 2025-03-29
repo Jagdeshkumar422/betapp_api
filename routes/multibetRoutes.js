@@ -119,7 +119,6 @@ router.get("/multibets/:userId", async (req, res) => {
             return res.status(404).json({ message: "Bet not found." });
         }
 
-        res.status(200).json({ updatedBet, updatedOdd: oddData });
     } catch (error) {
         console.error("Error updating bet:", error);
         res.status(500).json({ message: "Error updating bet", error: error.message });
