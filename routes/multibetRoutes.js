@@ -97,21 +97,9 @@ router.get("/multibets/:userId", async (req, res) => {
             return res.status(400).json({ message: "Bet ID and User ID are required." });
         }
 
-        // Check if an odd entry exists using _id instead of userId
-        // const oddData = await oddModel.findById(userId);
-
-        // if (!oddData) {
-        //     return res.status(404).json({ message: "Odd entry not found for this user." });
-        // }
-
-        // // Update the existing odd value
-        // oddData.odd = odd;
-        // await oddData.save();
-
-        // Update the bet entry while keeping everything else unchanged
         const updatedBet = await Bet.findByIdAndUpdate(
             id,
-            { market, pick, ftScore, outcome, status,odd }, // ✅ No changes to odd in Bet
+            { market, pick, ftScore, outcome, status, odd }, // ✅ No changes to odd in Bet
             { new: true, runValidators: true }
         );
 
@@ -119,11 +107,13 @@ router.get("/multibets/:userId", async (req, res) => {
             return res.status(404).json({ message: "Bet not found." });
         }
 
+        res.json(updatedBet); // ✅ Added this to return the updated bet
     } catch (error) {
         console.error("Error updating bet:", error);
         res.status(500).json({ message: "Error updating bet", error: error.message });
     }
 });
+
 
 
 
