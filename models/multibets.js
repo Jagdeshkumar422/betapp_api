@@ -14,6 +14,7 @@ const BetSchema = new mongoose.Schema({
     market: String,
     outcome: String,
     status: String,
+    odd: {type: String, default: 0.1},
     userId1: String
   });
 

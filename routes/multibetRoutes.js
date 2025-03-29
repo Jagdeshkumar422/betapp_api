@@ -19,16 +19,6 @@ router.post("/multibets", async (req, res) => {
             return res.status(400).json({ message: "No valid bets found." });
         }
 
-        // ✅ Log each extracted bet for debugging
-        text.forEach((bet, index) => {
-            console.log(`Bet ${index + 1}:`, bet);
-        });
-
-        // ✅ Multiply all odds together
-        let totalOdd = text.reduce((product, bet) => {
-            let oddValue = parseFloat(bet.odd || 1); // Default to 1 if odd is missing
-            return product * oddValue;
-        }, 1);
 
         console.log("✅ Total Odd (Multiplication):", totalOdd);
 
@@ -46,6 +36,7 @@ router.post("/multibets", async (req, res) => {
                 pick: bet.pick,
                 market: bet.market,
                 outcome: bet.outcome,
+                odd: odd,
                 createdAt: new Date(), // Automatically store timestamp
                 userId1
             }))
