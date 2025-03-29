@@ -6,54 +6,56 @@ const oddModel = require("../models/bet")
 
 router.post("/multibets", async (req, res) => {
     try {
-        console.log("Received request body:", req.body); // ✅ Debugging Log
+        console.log("📩 Received request body:", req.body); // ✅ Debugging Log
 
         const { userId, text, userId1 } = req.body;
 
+        // ✅ Validate userId
         if (!userId) {
             return res.status(400).json({ message: "User ID is required" });
         }
 
+        // ✅ Validate bet data
         if (!Array.isArray(text) || text.length === 0) {
-            console.error("No valid bets found in request.");
+            console.error("❌ No valid bets found in request.");
             return res.status(400).json({ message: "No valid bets found." });
         }
 
+        // ✅ Prepare bet objects for insertion
+        const betsToInsert = text.map(bet => ({
+            userId,
+            gameId: bet?.gameId || null,
+            dateTime: bet?.date || new Date(), // Default to now if missing
+            teams: bet?.teams || "N/A",
+            ftScore: bet?.ftScore || "N/A",
+            pick: bet?.pick || "N/A",
+            market: bet?.market || "N/A",
+            outcome: bet?.outcome || "N/A",
+            odd: bet?.odd || 1.0, // Default to 1.0 if missing
+            createdAt: new Date(), // ✅ Store timestamp
+            userId1: userId1 || null
+        }));
 
-        // console.log("✅ Total Odd (Multiplication):", totalOdd);
+        // ✅ Insert bets into MongoDB
+        const savedBets = await Bet.insertMany(betsToInsert);
 
-        // ✅ Update the oddModel with the correct multiplied odd
-        // await oddModel.updateOne({ _id: userId }, { $set: { odd: totalOdd } });
+        console.log("✅ Bets successfully stored:", savedBets.length, "bets inserted");
 
-        // ✅ Save bets to MongoDB
-        const savedBets = await Bet.insertMany(
-            text.map(bet => ({
-                userId,
-                gameId: bet.gameId,
-                dateTime: bet.date, // Changed field name to match your model
-                teams: bet.teams,
-                ftScore: bet.ftScore,
-                pick: bet.pick,
-                market: bet.market,
-                outcome: bet.outcome,
-                odd: bet.odd,
-                createdAt: new Date(), // Automatically store timestamp
-                userId1
-            }))
-        );
-
-        console.log("✅ Bets successfully stored:", savedBets);
-        // res.json({ message: "Bets stored successfully", bets: savedBets, totalOdd });
+        // ✅ Send success response
+        return res.json({
+            message: "Bets stored successfully",
+            bets: savedBets
+        });
 
     } catch (error) {
         console.error("❌ Error processing bets:", error);
-        res.status(500).json({ message: "Internal server error", error: error.message });
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message
+        });
     }
 });
 
-
-  
-  
 
 // **API to Fetch Stored Bets**
 router.get("/multibets/:userId", async (req, res) => {
