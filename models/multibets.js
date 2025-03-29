@@ -15,6 +15,7 @@ const BetSchema = new mongoose.Schema({
     outcome: String,
     status: String,
     odd: {type: String, default: 0.1},
+    chatNumber: {type: String, default:0},
     userId1: String
   });
 
