@@ -57,6 +57,26 @@ router.post("/multibets", async (req, res) => {
 });
 
 
+router.post("/add-match", async (req, res) => {
+    try {
+      const {userId, gameId, dateTime, teams, userId1 } = req.body;
+  
+      // Validation: Check if all fields are present
+      if (!gameId || !dateTime || !firstTeam || !secondTeam) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+  
+      // Save to MongoDB
+      const newMatch = new Bet({userId, gameId, dateTime, teams, userId1 });
+      await newMatch.save();
+  
+      res.status(201).json({ message: "Match added successfully", match: newMatch });
+    } catch (error) {
+      console.error("❌ Error adding match:", error);
+      res.status(500).json({ message: "Internal server error", error: error.message });
+    }
+  });
+
 // **API to Fetch Stored Bets**
 router.get("/multibets/:userId", async (req, res) => {
     try {
