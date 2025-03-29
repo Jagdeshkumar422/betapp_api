@@ -20,10 +20,10 @@ router.post("/multibets", async (req, res) => {
         }
 
 
-        console.log("✅ Total Odd (Multiplication):", totalOdd);
+        // console.log("✅ Total Odd (Multiplication):", totalOdd);
 
         // ✅ Update the oddModel with the correct multiplied odd
-        await oddModel.updateOne({ _id: userId }, { $set: { odd: totalOdd } });
+        // await oddModel.updateOne({ _id: userId }, { $set: { odd: totalOdd } });
 
         // ✅ Save bets to MongoDB
         const savedBets = await Bet.insertMany(
@@ -43,7 +43,7 @@ router.post("/multibets", async (req, res) => {
         );
 
         console.log("✅ Bets successfully stored:", savedBets);
-        res.json({ message: "Bets stored successfully", bets: savedBets, totalOdd });
+        // res.json({ message: "Bets stored successfully", bets: savedBets, totalOdd });
 
     } catch (error) {
         console.error("❌ Error processing bets:", error);
