@@ -62,7 +62,7 @@ router.post("/add-match", async (req, res) => {
       const {userId, gameId, dateTime, teams, userId1 } = req.body;
   
       // Validation: Check if all fields are present
-      if (!gameId || !dateTime || !firstTeam || !secondTeam) {
+      if (!gameId || !dateTime || !teams) {
         return res.status(400).json({ message: "All fields are required" });
       }
   
