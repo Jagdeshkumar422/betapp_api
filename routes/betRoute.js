@@ -26,18 +26,7 @@ router.post("/bets", async (req, res) => {
         return res.status(400).json({ error: "All fields are required" });
       }
 
-      const cashStatus= "cashout"
-      const amount= 0.00
-
-      const newCashout = new cashOut({
-        cashStatus,
-        amount,
-      });
-  
-      await newCashout.save();
-
-
-  
+    
       // Validate data types
       if (isNaN(stake) || stake <= 0) {
         return res.status(400).json({ error: "Invalid stake value" });
@@ -53,6 +42,18 @@ router.post("/bets", async (req, res) => {
 
       const newBet = new Bet({ userId, date, betCode, stake, odd });
       const savedBet = await newBet.save();
+
+      const cashStatus= "cashout"
+      const amount= 0.00
+
+      const newCashout = new cashOut({
+        cashStatus,
+        amount,
+        betId: savedBet._Id
+      });
+  
+      await newCashout.save();
+
     
       res.status(201).json(savedBet);
     } catch (error) {
