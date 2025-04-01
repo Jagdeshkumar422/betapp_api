@@ -18,49 +18,58 @@ router.get("/bets/:userId", async (req, res) => {
 
 // Add a Bet
 router.post("/bets", async (req, res) => {
-    try {
-      const { userId, date, betCode, stake, odd } = req.body;
-  
-      // Validate required fields
-      if (!userId || !date || !betCode || !stake) {
-        return res.status(400).json({ error: "All fields are required" });
-      }
+  try {
+    const { userId, date, betCode, stake, odd } = req.body;
 
-    
-      // Validate data types
-      if (isNaN(stake) || stake <= 0) {
-        return res.status(400).json({ error: "Invalid stake value" });
-      }
+    // Validate required fields
+    if (!userId || !date || !betCode || !stake) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
-      const deposit = await Deposit.findOne({ userId });
+    // Validate data types
+    if (isNaN(stake) || stake <= 0) {
+      return res.status(400).json({ error: "Invalid stake value" });
+    }
+
+    // Check if user has enough deposit
+    const deposit = await Deposit.findOne({ userId });
 
     if (!deposit || deposit.amount < stake) {
       return res.status(400).json({ message: "Insufficient balance" });
     }
+
+    // Deduct stake from deposit
     deposit.amount -= stake;
     await deposit.save();
 
-      const newBet = new Bet({ userId, date, betCode, stake, odd });
-      const savedBet = await newBet.save();
+    // Save new bet
+    const newBet = new Bet({ userId, date, betCode, stake, odd });
+    const savedBet = await newBet.save();
 
-      const cashStatus= "cashout"
-      const amount= 0.00
+    // Save cashout entry linked to the bet
+    const cashStatus = "cashout";
+    const amount = 0.00;
 
-      const newCashout = new cashOut({
-        cashStatus,
-        amount,
-        betId: savedBet._Id
-      });
-  
-      await newCashout.save();
+    const newCashout = new cashOut({
+      cashStatus,
+      amount,
+      betId: savedBet._id, // Fixed `_id` reference
+    });
 
-    
-      res.status(201).json(savedBet);
-    } catch (error) {
-      console.error("Error adding bet:", error.message);
-      res.status(500).json({ error: "Internal server error", details: error.message });
-    }
-  });
+    await newCashout.save();
+
+    res.status(201).json({
+      message: "Bet placed successfully",
+      bet: savedBet,
+      cashout: newCashout,
+    });
+
+  } catch (error) {
+    console.error("Error adding bet:", error.message);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
 
   // Update Odd for a Bet
 router.put("/bets/:betId", async (req, res) => {
