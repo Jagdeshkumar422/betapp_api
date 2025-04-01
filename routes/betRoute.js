@@ -3,6 +3,7 @@ const router = express.Router();
 const Bet = require("../models/bet");
 const Deposit =  require("../models/deposite")
 const Match = require("../models/multibets")
+const cashOut = require("../models/cashOut")
 
 // Fetch Bets for Logged-in User
 router.get("/bets/:userId", async (req, res) => {
@@ -24,6 +25,17 @@ router.post("/bets", async (req, res) => {
       if (!userId || !date || !betCode || !stake) {
         return res.status(400).json({ error: "All fields are required" });
       }
+
+      const cashStatus= "cashout"
+      const amount= 0.00
+
+      const newCashout = new cashOut({
+        cashStatus,
+        amount,
+      });
+  
+      await newCashout.save();
+
 
   
       // Validate data types
