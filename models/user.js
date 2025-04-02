@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema(
       default: "Active",
     },
     grandAuditLimit: { type: Number, default: 0 },
+    token: { type: String },
     userIcon: {
       type: String,
       default:
