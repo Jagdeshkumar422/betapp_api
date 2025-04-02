@@ -144,8 +144,12 @@ router.post("/login", async (req, res) => {
     expiresIn: "7d",
   });
 
+  // Store the new token in the database
+  await User.findByIdAndUpdate(user._id, { token });
+
   res.json({ success: true, message: "Login successful", token });
 });
+
 
 router.get("/user/profile", authMiddleware, async (req, res) => {
   try {
