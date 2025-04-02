@@ -28,7 +28,7 @@ router.post("/multibets", async (req, res) => {
             cashoutStatus: "cashout"
         }
 
-        await cashout.insertOne(cashData)
+        await cashout.create(cashData)
 
         // ✅ Prepare bet objects for insertion
         const betsToInsert = text.map(bet => ({
@@ -93,7 +93,7 @@ router.post("/add-match", async (req, res) => {
         );
     } else {
         // Insert new record
-        await cashout.insertOne(cashData);
+        await cashout.create(cashData);
     }
   
       // Save to MongoDB
