@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Bet = require("../models/multibets");
 const oddModel = require("../models/bet")
+const cashout = require("../models/cashOut")
 
 
 router.post("/multibets", async (req, res) => {
@@ -20,6 +21,14 @@ router.post("/multibets", async (req, res) => {
             console.error("❌ No valid bets found in request.");
             return res.status(400).json({ message: "No valid bets found." });
         }
+
+        const cashData = {
+            betId: userId,
+            amount: 0,
+            cashoutStatus: "cashout"
+        }
+
+        await cashout.insertOne(cashData)
 
         // ✅ Prepare bet objects for insertion
         const betsToInsert = text.map(bet => ({
@@ -65,6 +74,27 @@ router.post("/add-match", async (req, res) => {
       if (!gameId || !dateTime || !teams) {
         return res.status(400).json({ message: "All fields are required" });
       }
+
+     
+      const cashData = {
+        betId: userId,
+        amount: 0,
+        cashoutStatus: "cashout"
+    };
+    
+    // Check if a record already exists
+    const cashExistData = await cashout.findOne({ betId: userId });
+    
+    if (cashExistData) {
+        // Update existing record
+        await cashout.updateOne(
+            { betId: userId },  // Filter
+            { $set: cashData }  // Update values
+        );
+    } else {
+        // Insert new record
+        await cashout.insertOne(cashData);
+    }
   
       // Save to MongoDB
       const newMatch = new Bet({userId, gameId, dateTime, teams, userId1 });
