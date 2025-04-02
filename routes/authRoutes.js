@@ -139,13 +139,18 @@ router.post("/login", async (req, res) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-  // Generate JWT token
+  // Generate new JWT token
   const token = jwt.sign({ id: user._id, email: user.email }, SECRET_KEY, {
     expiresIn: "7d",
   });
 
+  // Save the latest token in the database
+  user.latestToken = token;
+  await user.save();
+
   res.json({ success: true, message: "Login successful", token });
 });
+
 
 router.get("/user/profile", authMiddleware, async (req, res) => {
   try {
