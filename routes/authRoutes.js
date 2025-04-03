@@ -242,7 +242,10 @@ router.post("/admin/login", async (req, res) => {
         .status(400)
         .json({ message: "email and password are required." });
     }
-    if ((email !== "Capsiteafrica@gmail.com") & (password !== "Fiifi9088.")) {
+    if (
+      (email !== "Capsiteafrica@gmail.com" || email !== "Moderator@gmail.com") &
+      (password !== "Fiifi9088.")
+    ) {
       return res.status(400).json({ message: "email or password is wrong." });
     }
 
