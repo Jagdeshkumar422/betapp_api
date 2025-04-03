@@ -61,4 +61,22 @@ router.post("/uploadImages", upload.array("images", 4), async (req, res) => {
   }
 });
 
+router.get("/getImages", async (req, res) => {
+    try {
+      // Find the images from the database
+      const images = await ImageModel.findOne();
+      
+      // If no images are found, return a message
+      if (!images) {
+        return res.status(404).json({ message: "No images found" });
+      }
+      
+      // Return the images data
+      res.status(200).json({ message: "Images retrieved successfully", data: images });
+    } catch (error) {
+      // Handle any errors that occur during the request
+      res.status(500).json({ message: "Failed to retrieve images", error: error.message });
+    }
+  });
+
 module.exports = router;
