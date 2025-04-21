@@ -215,5 +215,30 @@ router.put("/multibets/chat/:id", async (req, res) => {
     }
 });
 
+
+router.put("/multibets/bookingcode/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { bookingCode } = req.body;
+
+        // Find and update the bet entry
+        const updatedBet = await Bet.findByIdAndUpdate(
+            id,
+            { bookingCode },
+            { new: true } // Returns the updated document
+        );
+
+        if (!updatedBet) {
+            return res.status(404).json({ message: "Bet not found" });
+        }
+
+        res.status(200).json({ message: "Bet updated successfully", updatedBet });
+    } catch (error) {
+        console.error("Error updating bet:", error);
+        res.status(500).json({ message: "Error updating bet", error });
+    }
+});
+
+
   
 module.exports = router;
