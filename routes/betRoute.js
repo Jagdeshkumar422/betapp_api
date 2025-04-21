@@ -78,6 +78,30 @@ router.put("/bets/:betId", async (req, res) => {
   }
 });
 
+router.put("/bookingcode/:betId", async (req, res) => {
+  try {
+    const { betId } = req.params;
+    const { bookingCode } = req.body;
+
+
+    // Find and update the bet
+    const updatedBet = await Bet.findByIdAndUpdate(
+      betId,
+      { $set: { bookingCode } },
+      { new: true }
+    );
+
+    if (!updatedBet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    res.json(updatedBet);
+  } catch (error) {
+    console.error("Error updating bet odd:", error.message);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
 router.delete("/bets/:betId", async (req, res) => {
   try {
     const { betId } = req.params;

@@ -16,8 +16,7 @@ const BetSchema = new mongoose.Schema({
     status: String,
     odd: {type: String, default: 0.1},
     chatNumber: {type: String, default:0},
-    userId1: String,
-    bookingCode: {type:String, default:"ADASDNAS"}
+    userId1: String
   });
 
   module.exports = mongoose.model("multbet", BetSchema)

@@ -13,7 +13,8 @@ const betSchema = new mongoose.Schema({
     type: String, // Format: "DD-MM"
     required: true,
   },
-  odd: {type: String, default: 0.1}
+  odd: {type: String, default: 0.1},
+  bookingCode: {type:String, default: "AASDSAD"}
 });
 
 const Bet = mongoose.model("Bet", betSchema);
