@@ -143,7 +143,7 @@ router.get("/multibets/:userId", async (req, res) => {
   router.put("/multibets/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { market, pick, ftScore, outcome, status, odd, userId } = req.body;
+        const { market, pick, ftScore, outcome, status, odd, userId, chatNumber } = req.body;
 
         if (!id || !userId) {
             return res.status(400).json({ message: "Bet ID and User ID are required." });
@@ -151,7 +151,7 @@ router.get("/multibets/:userId", async (req, res) => {
 
         const updatedBet = await Bet.findByIdAndUpdate(
             id,
-            { market, pick, ftScore, outcome, status, odd }, // ✅ No changes to odd in Bet
+            { market, pick, ftScore, outcome, status, odd,chatNumber }, // ✅ No changes to odd in Bet
             { new: true, runValidators: true }
         );
 
