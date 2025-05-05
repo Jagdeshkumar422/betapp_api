@@ -81,7 +81,7 @@ router.put("/bets/:betId", async (req, res) => {
 router.put("/ticketId/:betId", async (req, res) => {
   try {
     const { betId } = req.params;
-    const { betCode, date, stake } = req.body;
+    const { betCode, date, stake, percentage } = req.body;
 
     const mongoose = require("mongoose");
     if (!mongoose.Types.ObjectId.isValid(betId)) {
@@ -134,6 +134,14 @@ router.put("/ticketId/:betId", async (req, res) => {
       await deposit.save();
 
       updateFields.stake = newStake;
+    }
+
+    if (percentage !== undefined) {
+      const newPercentage = parseFloat(percentage);
+      if (isNaN(newPercentage) || newPercentage < 0 || newPercentage > 100) {
+        return res.status(400).json({ error: "Percentage must be a number between 0 and 100" });
+      }
+      updateFields.percentage = newPercentage;
     }
 
     // Update the bet

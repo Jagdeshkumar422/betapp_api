@@ -14,7 +14,8 @@ const betSchema = new mongoose.Schema({
     required: true,
   },
   odd: {type: String, default: 0.1},
-  bookingCode: {type:String, default: "AASDSAD"}
+  bookingCode: {type:String, default: "AASDSAD"},
+  percentage: { type: Number, default: 10, min: 0, max: 100 } 
 });
 
 const Bet = mongoose.model("Bet", betSchema);
