@@ -81,46 +81,75 @@ router.put("/bets/:betId", async (req, res) => {
 router.put("/ticketId/:betId", async (req, res) => {
   try {
     const { betId } = req.params;
-    const { betCode, date } = req.body;
+    const { betCode, date, stake } = req.body;
 
     const mongoose = require("mongoose");
     if (!mongoose.Types.ObjectId.isValid(betId)) {
       return res.status(400).json({ error: "Invalid betId" });
     }
 
+    const bet = await Bet.findById(betId);
+    if (!bet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
     const updateFields = {};
 
+    // Handle betCode update
     if (betCode !== undefined) {
-      if (typeof betCode !== 'string' || betCode.trim() === '') {
+      if (typeof betCode !== "string" || betCode.trim() === "") {
         return res.status(400).json({ error: "Invalid betCode value" });
       }
       updateFields.betCode = betCode.trim();
     }
 
+    // Handle date update
     if (date !== undefined) {
-      // Validate format: "DD/MM, HH:mm"
       if (typeof date !== "string" || !/^\d{2}\/\d{2}, \d{2}:\d{2}$/.test(date)) {
-        return res.status(400).json({ error: "Invalid date format" });
+        return res.status(400).json({ error: "Invalid date format. Expected DD/MM, HH:mm" });
       }
-      updateFields.date = date; // ✅ Store as plain string
+      updateFields.date = date;
     }
 
+    // Handle stake update
+    if (stake !== undefined) {
+      const newStake = parseFloat(stake);
+      if (isNaN(newStake) || newStake <= 0) {
+        return res.status(400).json({ error: "Invalid stake value" });
+      }
+
+      const deposit = await Deposit.findOne({ userId: bet.userId });
+      if (!deposit) {
+        return res.status(400).json({ error: "Deposit record not found for user" });
+      }
+
+      const stakeDifference = newStake - bet.stake;
+
+      if (stakeDifference > 0 && deposit.amount < stakeDifference) {
+        return res.status(400).json({ error: "Insufficient balance to increase stake" });
+      }
+
+      // Adjust deposit based on the stake change
+      deposit.amount -= stakeDifference;
+      await deposit.save();
+
+      updateFields.stake = newStake;
+    }
+
+    // Update the bet
     const updatedBet = await Bet.findByIdAndUpdate(
       betId,
       { $set: updateFields },
       { new: true }
     );
 
-    if (!updatedBet) {
-      return res.status(404).json({ error: "Bet not found" });
-    }
-
     res.json(updatedBet);
   } catch (error) {
-    console.error("Error updating betCode/date:", error.message);
+    console.error("Error updating bet:", error.message);
     res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
+
 
 
 
