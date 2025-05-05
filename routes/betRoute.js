@@ -81,22 +81,32 @@ router.put("/bets/:betId", async (req, res) => {
 router.put("/ticketId/:betId", async (req, res) => {
   try {
     const { betId } = req.params;
-    const { betCode } = req.body;
+    const { betCode, date } = req.body;
 
-    // Validation for MongoDB ObjectId
-    const mongoose = require('mongoose');
+    const mongoose = require("mongoose");
     if (!mongoose.Types.ObjectId.isValid(betId)) {
       return res.status(400).json({ error: "Invalid betId" });
     }
 
-    // Proper string validation
-    if (!betCode || typeof betCode !== 'string' || betCode.trim() === '') {
-      return res.status(400).json({ error: "Invalid betCode value" });
+    const updateFields = {};
+
+    if (betCode !== undefined) {
+      if (typeof betCode !== 'string' || betCode.trim() === '') {
+        return res.status(400).json({ error: "Invalid betCode value" });
+      }
+      updateFields.betCode = betCode.trim();
+    }
+
+    if (date !== undefined) {
+      if (isNaN(Date.parse(date))) {
+        return res.status(400).json({ error: "Invalid date format" });
+      }
+      updateFields.date = new Date(date);
     }
 
     const updatedBet = await Bet.findByIdAndUpdate(
       betId,
-      { $set: { betCode: betCode.trim() } },
+      { $set: updateFields },
       { new: true }
     );
 
@@ -106,10 +116,11 @@ router.put("/ticketId/:betId", async (req, res) => {
 
     res.json(updatedBet);
   } catch (error) {
-    console.error("Error updating betCode:", error.message);
+    console.error("Error updating betCode/date:", error.message);
     res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
+
 
 
 router.put("/bookingcode/:betId", async (req, res) => {
