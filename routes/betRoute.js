@@ -83,15 +83,20 @@ router.put("/ticketId/:betId", async (req, res) => {
     const { betId } = req.params;
     const { betCode } = req.body;
 
-    // Validate the odd value
-    if (!betCode || isNaN(betCode) || betCode <= 0) {
+    // Validation for MongoDB ObjectId
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(betId)) {
+      return res.status(400).json({ error: "Invalid betId" });
+    }
+
+    // Proper string validation
+    if (!betCode || typeof betCode !== 'string' || betCode.trim() === '') {
       return res.status(400).json({ error: "Invalid betCode value" });
     }
 
-    // Find and update the bet
     const updatedBet = await Bet.findByIdAndUpdate(
       betId,
-      { $set: { betCode } },
+      { $set: { betCode: betCode.trim() } },
       { new: true }
     );
 
@@ -101,10 +106,11 @@ router.put("/ticketId/:betId", async (req, res) => {
 
     res.json(updatedBet);
   } catch (error) {
-    console.error("Error updating bet odd:", error.message);
+    console.error("Error updating betCode:", error.message);
     res.status(500).json({ error: "Internal server error", details: error.message });
   }
 });
+
 
 router.put("/bookingcode/:betId", async (req, res) => {
   try {
