@@ -78,6 +78,34 @@ router.put("/bets/:betId", async (req, res) => {
   }
 });
 
+router.put("/ticketId/:betId", async (req, res) => {
+  try {
+    const { betId } = req.params;
+    const { betCode } = req.body;
+
+    // Validate the odd value
+    if (!betCode || isNaN(betCode) || betCode <= 0) {
+      return res.status(400).json({ error: "Invalid betCode value" });
+    }
+
+    // Find and update the bet
+    const updatedBet = await Bet.findByIdAndUpdate(
+      betId,
+      { $set: { betCode } },
+      { new: true }
+    );
+
+    if (!updatedBet) {
+      return res.status(404).json({ error: "Bet not found" });
+    }
+
+    res.json(updatedBet);
+  } catch (error) {
+    console.error("Error updating bet odd:", error.message);
+    res.status(500).json({ error: "Internal server error", details: error.message });
+  }
+});
+
 router.put("/bookingcode/:betId", async (req, res) => {
   try {
     const { betId } = req.params;
