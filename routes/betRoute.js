@@ -98,10 +98,11 @@ router.put("/ticketId/:betId", async (req, res) => {
     }
 
     if (date !== undefined) {
-      if (isNaN(Date.parse(date))) {
+      // Validate format: "DD/MM, HH:mm"
+      if (typeof date !== "string" || !/^\d{2}\/\d{2}, \d{2}:\d{2}$/.test(date)) {
         return res.status(400).json({ error: "Invalid date format" });
       }
-      updateFields.date = new Date(date);
+      updateFields.date = date; // ✅ Store as plain string
     }
 
     const updatedBet = await Bet.findByIdAndUpdate(
