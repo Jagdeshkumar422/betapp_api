@@ -47,6 +47,7 @@ router.patch("/matches/:id", async (req, res) => {
   try {
     const matchId = req.params.id;
     const updateFields = req.body;
+    console.log(updateFields)
 
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({ message: "No update fields provided" });
