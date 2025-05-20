@@ -12,6 +12,7 @@ const verifycodeRoute = require("./routes/verifyCodeRoute.js");
 const oddRoute = require("./routes/oddRoute.js");
 const cashOut = require("./routes/cashoutRoute.js");
 const imageRoutes = require("./routes/ImageRoute.js")
+const matchesRoutes = require("./routes/matchesRoute.js")
 
 // Middleware for parsing JSON
 app.use(express.json());
@@ -39,6 +40,7 @@ app.use("/api", verifycodeRoute);
 app.use("/api", oddRoute);
 app.use("/api", cashOut);
 app.use("/api", imageRoutes);
+app.use("/api", matchesRoutes);
 
 
 // Connect to MongoDB (replace with your own URI)
