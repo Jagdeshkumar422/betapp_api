@@ -32,4 +32,14 @@ router.post("/matches", async (req, res) => {
   }
 });
 
+router.get("/matches", async (req, res) => {
+  try {
+    const matches = await Match.find().sort({ time: 1 }); // Optional: sort by match time
+    res.status(200).json(matches);
+  } catch (error) {
+    console.error("Error fetching matches:", error);
+    res.status(500).json({ error: "Failed to fetch matches" });
+  }
+});
+
 module.exports = router;
