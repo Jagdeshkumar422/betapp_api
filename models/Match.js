@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const MatchSchema = new mongoose.Schema({
-  matchId: Number, // Renamed from `id` to avoid conflict with Mongoose _id
+  matchId: Number,
   time: String,
   league: String,
   homeTeam: String,
@@ -9,7 +9,7 @@ const MatchSchema = new mongoose.Schema({
   homeOdd: String,
   drawOdd: String,
   awayOdd: String,
-  points: String, // keep as string if values like "BEST ODDS" are possible
+  points: String,
   isLive: { type: Boolean, default: false },
 });
 
