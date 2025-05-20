@@ -1,24 +1,35 @@
-// server.js or routes/matches.js
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Match = require('../models/Match');
+const Match = require("../models/Match");
 
+// POST /api/matches - Save multiple matches
 router.post("/matches", async (req, res) => {
-  const matches = req.body;  // Expecting an array directly
-
-  if (!Array.isArray(matches) || matches.length === 0) {
-    return res.status(400).json({ error: "No matches provided" });
-  }
-
   try {
-    // Save matches to DB
-    const savedMatches = await Match.insertMany(matches);
+    const matches = req.body.matches;
+
+    if (!Array.isArray(matches) || matches.length === 0) {
+      return res.status(400).json({ message: "No matches provided" });
+    }
+
+    const formattedMatches = matches.map((match) => ({
+      matchId: Math.floor(Math.random() * 100000), // or use match.id if you have it
+      time: match.time,
+      league: match.league,
+      homeTeam: match.homeTeam,
+      awayTeam: match.awayTeam,
+      homeOdd: match.homeOdd || "",
+      drawOdd: match.drawOdd || "",
+      awayOdd: match.awayOdd || "",
+      points: match.points || "",
+      isLive: match.isLive || false,
+    }));
+
+    const savedMatches = await Match.insertMany(formattedMatches);
     res.status(201).json(savedMatches);
   } catch (error) {
     console.error("Error saving matches:", error);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ error: "Failed to save matches" });
   }
 });
-
 
 module.exports = router;
