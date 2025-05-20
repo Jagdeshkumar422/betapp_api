@@ -42,4 +42,32 @@ router.get("/matches", async (req, res) => {
   }
 });
 
+// PATCH /api/matches/:id - Update a match by ID
+router.patch("/matches/:id", async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const updateFields = req.body;
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ message: "No update fields provided" });
+    }
+
+    const updatedMatch = await Match.findByIdAndUpdate(
+      matchId,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedMatch) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    res.status(200).json(updatedMatch);
+  } catch (error) {
+    console.error("Error updating match:", error);
+    res.status(500).json({ error: "Failed to update match" });
+  }
+});
+
+
 module.exports = router;
