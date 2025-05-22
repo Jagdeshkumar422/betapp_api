@@ -32,6 +32,52 @@ router.post("/matches", async (req, res) => {
   }
 });
 
+router.post("/matches/single", async (req, res) => {
+  try {
+    const {
+      league,
+      isLive,
+      time,
+      homeTeam,
+      awayTeam,
+      homeScore,
+      awayScore,
+      homeOdd,
+      drawOdd,
+      awayOdd,
+      points,
+      // Assuming 'day' is either optional or handled by schema default/frontend
+    } = req.body;
+
+    const match = new Match({
+      league,
+      time,
+      // You might want to add a 'day' field here if it's required by your schema
+      // For example: day: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+      isLive: isLive || false,
+      homeScore: homeScore || "0",
+      awayScore: awayScore || "0",
+      points: points || "0",
+      homeTeam: homeTeam, // Directly assign if schema allows string
+      awayTeam: awayTeam, // Directly assign if schema allows string
+      homeOdd: homeOdd,
+      drawOdd: drawOdd,
+      awayOdd: awayOdd,
+      // If your schema has nested objects for teams/odds, you'd structure it like:
+      // leftTeam: { name: homeTeam, logo: null },
+      // rightTeam: { name: awayTeam, logo: null },
+      // odds: { one: homeOdd, draw: drawOdd, two: awayOdd },
+    });
+
+    await match.save();
+    res.status(201).json(match);
+  } catch (error) {
+    console.error("Error creating manual match:", error);
+    res.status(500).json({ message: "Server error creating manual match", error: error.message });
+  }
+});
+
+
 router.get("/matches", async (req, res) => {
   try {
     const matches = await Match.find().sort({ time: 1 }); // Optional: sort by match time
