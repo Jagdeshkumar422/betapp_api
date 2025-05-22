@@ -20,6 +20,7 @@ const userSchema = new mongoose.Schema(
     },
     grandAuditLimit: { type: Number, default: 0 },
     token: { type: String },
+    role: {type: String, default: "user"},
     userIcon: {
       type: String,
       default:
