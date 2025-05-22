@@ -13,11 +13,14 @@ const oddRoute = require("./routes/oddRoute.js");
 const cashOut = require("./routes/cashoutRoute.js");
 const imageRoutes = require("./routes/ImageRoute.js")
 const matchesRoutes = require("./routes/matchesRoute.js")
+const topmatchesRoutes = require("./routes/topMatchRoute.js")
+const path = require("path")
 
 // Middleware for parsing JSON
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(
   cors({
     origin: "*", // Replace with your frontend URL
@@ -41,6 +44,7 @@ app.use("/api", oddRoute);
 app.use("/api", cashOut);
 app.use("/api", imageRoutes);
 app.use("/api", matchesRoutes);
+app.use("/api", topmatchesRoutes);
 
 
 // Connect to MongoDB (replace with your own URI)
