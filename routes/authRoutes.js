@@ -150,7 +150,6 @@ router.post("/login", async (req, res) => {
   res.json({ success: true, message: "Login successful", token });
 });
 
-
 router.get("/user/profile", authMiddleware, async (req, res) => {
   try {
     // Get user ID from request after authentication
@@ -278,7 +277,8 @@ router.delete("/admin/deleteUser/:id", async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-    await User.findOneAndDelete(id);
+    // await User.findOneAndDelete(id);
+    await User.findByIdAndDelete(id);
     res
       .status(200)
       .json({ success: true, message: "User deleted successfully." });
