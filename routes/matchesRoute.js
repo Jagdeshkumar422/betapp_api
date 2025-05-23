@@ -63,10 +63,8 @@ router.post("/matches/single", async (req, res) => {
       homeOdd: homeOdd,
       drawOdd: drawOdd,
       awayOdd: awayOdd,
-      // If your schema has nested objects for teams/odds, you'd structure it like:
-      // leftTeam: { name: homeTeam, logo: null },
-      // rightTeam: { name: awayTeam, logo: null },
-      // odds: { one: homeOdd, draw: drawOdd, two: awayOdd },
+      hot: true,
+      bestOdd:true
     });
 
     await match.save();
@@ -115,6 +113,42 @@ router.patch("/matches/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to update match" });
   }
 });
+
+// PATCH /api/matches/:id/status - Update bestOdd and hot fields
+router.patch("/matches/:id/status", async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const { bestOdd, hot } = req.body;
+
+    // Validate input
+    if (typeof bestOdd === "undefined" && typeof hot === "undefined") {
+      return res.status(400).json({ message: "No status fields provided" });
+    }
+
+    const updateFields = {};
+    if (typeof bestOdd !== "undefined") updateFields.bestOdd = bestOdd;
+    if (typeof hot !== "undefined") updateFields.hot = hot;
+
+    const updatedMatch = await Match.findByIdAndUpdate(
+      matchId,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedMatch) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    res.status(200).json({
+      message: "Match status updated successfully",
+      match: updatedMatch,
+    });
+  } catch (error) {
+    console.error("Error updating match status:", error);
+    res.status(500).json({ error: "Failed to update match status" });
+  }
+});
+
 
 
 module.exports = router;

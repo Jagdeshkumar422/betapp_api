@@ -11,6 +11,8 @@ const MatchSchema = new mongoose.Schema({
   awayOdd: String,
   points: String,
   isLive: { type: Boolean, default: false },
+  hot:{type: Boolean, default : true},
+  bestOdd:{type: Boolean, default : true},
 });
 
 module.exports = mongoose.model("Match", MatchSchema);
