@@ -50,9 +50,8 @@ router.post("/verify-otp", async (req, res) => {
 });
 
 router.post("/register", async (req, res) => {
-  const { name, password, username, email, expiryDate, subscription } =
+  const { name, password, username, email, expiryDate, subscription, role } =
     req.body;
-  console.log(req.body);
 
   try {
     if (
@@ -65,7 +64,9 @@ router.post("/register", async (req, res) => {
       !email ||
       email.trim() === "" ||
       !expiryDate ||
-      expiryDate.trim() === ""
+      expiryDate.trim() === "" ||
+      !role ||
+      role.trim() === ""
     ) {
       return res
         .status(400)
@@ -113,9 +114,11 @@ router.post("/register", async (req, res) => {
       subscription,
       expiry,
       grandAuditLimit,
+      role,
     });
 
     await newUser.save();
+    console.log(newUser);
     res
       .status(201)
       .json({ success: true, message: "User registered successfully" });
@@ -149,7 +152,6 @@ router.post("/login", async (req, res) => {
 
   res.json({ success: true, message: "Login successful", token });
 });
-
 
 router.get("/user/profile", authMiddleware, async (req, res) => {
   try {
@@ -278,7 +280,8 @@ router.delete("/admin/deleteUser/:id", async (req, res) => {
         .status(404)
         .json({ success: false, message: "User not found" });
     }
-    await User.findOneAndDelete(id);
+    // await User.findOneAndDelete(id);
+    await User.findByIdAndDelete(id);
     res
       .status(200)
       .json({ success: true, message: "User deleted successfully." });
