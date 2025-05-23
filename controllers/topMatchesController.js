@@ -94,3 +94,60 @@ exports.deleteMatch = async (req, res) => {
     res.status(500).json({ message: "Server error deleting match" });
   }
 };
+
+
+exports.updateMatches = async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const match = await Match.findById(matchId);
+
+    if (!match) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    // Update basic fields
+    const fieldsToUpdate = [
+      "league",
+      "time",
+      "day",
+      "isHot",
+      "isBestOdd",
+    ];
+    fieldsToUpdate.forEach(field => {
+      if (req.body[field] !== undefined) {
+        match[field] = req.body[field];
+      }
+    });
+
+    // Update nested fields (teams & odds)
+    if (req.body.leftTeamName) {
+      match.leftTeam.name = req.body.leftTeamName;
+    }
+    if (req.body.rightTeamName) {
+      match.rightTeam.name = req.body.rightTeamName;
+    }
+    if (req.body.oddsOne) {
+      match.odds.one = req.body.oddsOne;
+    }
+    if (req.body.oddsDraw) {
+      match.odds.draw = req.body.oddsDraw;
+    }
+    if (req.body.oddsTwo) {
+      match.odds.two = req.body.oddsTwo;
+    }
+
+    // Handle file uploads for team logos
+    if (req.files?.leftLogo) {
+      match.leftTeam.logo = req.files.leftLogo[0].filename;
+    }
+    if (req.files?.rightLogo) {
+      match.rightTeam.logo = req.files.rightLogo[0].filename;
+    }
+
+    const updatedMatch = await match.save();
+    res.json(updatedMatch);
+  } catch (error) {
+    console.error("Error updating match:", error);
+    res.status(500).json({ message: "Server error updating match" });
+  }
+};
