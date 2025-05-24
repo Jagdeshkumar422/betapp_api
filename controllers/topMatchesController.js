@@ -151,3 +151,38 @@ exports.updateMatches = async (req, res) => {
     res.status(500).json({ message: "Server error updating match" });
   }
 };
+
+
+exports.topmatchUpda = async (req, res) => {
+  try {
+    const matchId = req.params.id;
+    const { bestOdd, hot } = req.body;
+
+    // Validate input
+    if (typeof bestOdd === "undefined" && typeof hot === "undefined") {
+      return res.status(400).json({ message: "No status fields provided" });
+    }
+
+    const updateFields = {};
+    if (typeof bestOdd !== "undefined") updateFields.bestOdd = bestOdd;
+    if (typeof hot !== "undefined") updateFields.hot = hot;
+
+    const updatedMatch = await Match.findByIdAndUpdate(
+      matchId,
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedMatch) {
+      return res.status(404).json({ message: "Match not found" });
+    }
+
+    res.status(200).json({
+      message: "Match status updated successfully",
+      match: updatedMatch,
+    });
+  } catch (error) {
+    console.error("Error updating match status:", error);
+    res.status(500).json({ error: "Failed to update match status" });
+  }
+}

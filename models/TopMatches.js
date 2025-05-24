@@ -19,6 +19,10 @@ const matchSchema = new mongoose.Schema({
     draw: String,
     two: String,
   },
+  hot:{
+    type:Boolean, default: true
+  },
+  bestOdd:{type:Boolean, default: true}
 });
 
 module.exports = mongoose.model("TopMatch", matchSchema);
